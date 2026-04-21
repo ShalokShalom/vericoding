@@ -1,0 +1,18 @@
+{
+  "nixpkgs": {
+    "type": "github",
+    "owner": "NixOS",
+    "repo": "nixpkgs",
+    "branch": "nixos-unstable",
+    "rev": "d9db5d5c3e13a0acab81d37e2f42742494e7cf71",
+    "sha256": "0000000000000000000000000000000000000000000000000000"
+  },
+  "rust-overlay": {
+    "type": "github",
+    "owner": "oxalica",
+    "repo": "rust-overlay",
+    "branch": "master",
+    "rev": "6f7ef35a97fd8ea979e8b1d73ab3549399424d5a",
+    "sha256": "0000000000000000000000000000000000000000000000000000"
+  }
+}
