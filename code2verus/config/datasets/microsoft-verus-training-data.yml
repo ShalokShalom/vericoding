@@ -1,0 +1,82 @@
+# Dataset configuration for microsoft/Verus_Training_Data
+# https://huggingface.co/datasets/microsoft/Verus_Training_Data
+#
+# This dataset contains ~6.9 million verified Verus programs generated
+# by the VeruSyn pipeline (Microsoft Research, 2026). Every example is
+# verifier-certified by the real Verus toolchain.
+
+dataset:
+  source: huggingface
+  path: microsoft/Verus_Training_Data
+  split: train
+  source_language: verus
+  target_language: dafny
+
+# Translation config
+translation:
+  config: verus-to-dafny
+  body_policy: full          # translate implementations, not just specs
+  max_translation_iterations: 5
+  max_retries: 16
+  max_concurrent: 4
+
+# Difficulty classification
+# Examples are bucketed before sending to the LLM so that prompt and
+# resource allocation can differ by class.
+classification:
+  enabled: true
+  buckets:
+    easy:
+      description: >
+        Pure spec fn, simple proofs, quantifiers, sequences, sets, maps.
+        No struct/impl/trait, no machine arithmetic, no ghost views.
+      patterns:
+        - spec_fn_only
+        - no_impl_blocks
+        - no_traits
+        - no_wrapping_arithmetic
+    medium:
+      description: >
+        Recursive proofs, ADTs, moderate module structure, ordinary
+        executable functions with straightforward contracts.
+      patterns:
+        - has_datatype_or_enum
+        - has_module
+        - has_executable_fn
+    hard:
+      description: >
+        Traits, impl blocks, mutable state, proof-heavy executable code,
+        machine-arithmetic-sensitive semantics, ghost views.
+      patterns:
+        - has_trait
+        - has_impl
+        - has_ghost_view
+        - has_wrapping_arithmetic
+    very_hard:
+      description: >
+        Ownership-critical correctness arguments, unsafe-adjacent code,
+        advanced Verus proof idioms with no close Dafny analogue.
+      patterns:
+        - has_unsafe
+        - has_raw_pointer
+        - ownership_sensitive_proof
+
+# What metadata to record per translated example
+metadata:
+  record:
+    - source_language
+    - target_language
+    - difficulty_bucket
+    - preserved_constructs
+    - erased_constructs
+    - normalization_notes
+    - verification_result
+    - verification_errors
+    - translation_iterations
+
+# Output
+output:
+  directory: artifacts/microsoft-verus-training-data
+  format: yaml           # structured YAML with vc-description/preamble/spec/code
+  manifest: results.jsonl
+  per_bucket_stats: true
